@@ -2,6 +2,9 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const mongoose = require('mongoose');
 const keys = require('./keys');
 
+//
+const User = mongoose.model('users');
+
 module.exports = function(passport) {
   passport.use(
   	new GoogleStrategy({
@@ -10,9 +13,46 @@ module.exports = function(passport) {
   		callbackURL: '/auth/google/callback',
   		proxy: true
   	}, (accessToken, refershToken, profile, done) => {
-  		console.log(accessToken);
-  		console.log(profile);  		
+  		//console.log(accessToken);
+  		//console.log(profile);		
+  		var length = profile.photos[0].value.indexOf('?');  
+  		var image = '';		
+  		if(length > 0){
+  			image = profile.photos[0].value.substring(0, length);
+  		} else {
+  			image = profile.photos[0].value;
+  		}  		
+  		const newUser = {
+  			googleID: profile.id,
+  			firstName: profile.displayName,
+  			lastName: profile.name.familyName,
+  			email: profile.emails[0].value,
+  			image: image
+  		}
+
+  		//CHECK FOR EXISTING USER
+  		User.findOne({
+  			googleID: profile.id
+  		}).then(user => {
+  			if(user) {
+  				//return user
+  				done(null, user);
+  			} else {
+  				//Create User
+  				new User(newUser)
+  				 .save()
+  				 .then(user => done(null, user)); 
+  			}
+  		})  		
   	})
-  )
+  );
+
+  passport.serializeUser((user, done) => {
+  	done(null, user.id);
+  });
+
+  passport.deserializeUser((id, done) => {
+  	User.findById(id).then(user => done(null, user));
+  });
 }
 
