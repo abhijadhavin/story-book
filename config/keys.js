@@ -1,8 +1,16 @@
+if(process.env.NODE_ENV === 'production') {
+	module.exports = require("./keys_prod");
+} else {
+	module.exports = require("./keys_dev");
+}
+
+/*
 module.exports = {
 	mongoURI: 'mongodb+srv://abhijadhavin:abhijeet31@cluster0-9hbmf.mongodb.net/storybooks-dev?retryWrites=true&w=majority',
 	googleClientID: '463694277188-cpi25m4qjn6rp612icbcipjd7gcoce9p.apps.googleusercontent.com',
 	googleClientSecret: 'tm2cUa5uSJsAKWLy-nMvVopg'
 }
+*/
 
 
 
